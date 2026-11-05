@@ -3,7 +3,9 @@ pipeline {
     agent any
 
     environment {
-        ANDROID_HOME = '/opt/android-sdk'
+        ANDROID_HOME = "${env.ANDROID_HOME ?: '/opt/android-sdk'}"
+        JAVA_HOME = "${env.JAVA_HOME ?: '/usr/lib/jvm/java-17-openjdk-amd64'}"
+        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -13,9 +15,10 @@ pipeline {
             }
         }
 
-        stage('Configure Java') {
+        stage('Configure Environment') {
             steps {
                 sh '''
+                    # Auto-detect JAVA_HOME if configured directory does not exist
                     if [ ! -d "$JAVA_HOME" ]; then
                         echo "Configured JAVA_HOME ($JAVA_HOME) not found, attempting auto-detection..."
                         if [ -d "/usr/lib/jvm/java-17-openjdk-arm64" ]; then
@@ -30,22 +33,67 @@ pipeline {
                         export PATH="$JAVA_HOME/bin:$PATH"
                     fi
 
+                    # Auto-detect ANDROID_HOME if configured directory does not exist
+                    if [ ! -d "$ANDROID_HOME" ]; then
+                        echo "Configured ANDROID_HOME ($ANDROID_HOME) not found, attempting auto-detection..."
+                        if [ -d "$HOME/Library/Android/sdk" ]; then
+                            export ANDROID_HOME="$HOME/Library/Android/sdk"
+                        elif [ -d "/usr/local/share/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/local/share/android-sdk"
+                        elif [ -d "/usr/lib/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/lib/android-sdk"
+                        elif [ -d "/var/lib/jenkins/android-sdk" ]; then
+                            export ANDROID_HOME="/var/lib/jenkins/android-sdk"
+                        fi
+                    fi
+
                     echo "JAVA_HOME is set to: $JAVA_HOME"
                     echo "Checking Java version..."
                     java -version
+
+                    echo "ANDROID_HOME is set to: $ANDROID_HOME"
+                    if [ -d "$ANDROID_HOME" ]; then
+                        echo "Android SDK directory verified at $ANDROID_HOME"
+                    else
+                        echo "WARNING: Android SDK directory not found at $ANDROID_HOME"
+                    fi
                 '''
             }
         }
 
         stage('Build') {
             steps {
-                sh './gradlew clean assembleDebug'
+                sh '''
+                    if [ ! -d "$ANDROID_HOME" ]; then
+                        if [ -d "$HOME/Library/Android/sdk" ]; then
+                            export ANDROID_HOME="$HOME/Library/Android/sdk"
+                        elif [ -d "/usr/local/share/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/local/share/android-sdk"
+                        elif [ -d "/usr/lib/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/lib/android-sdk"
+                        fi
+                    fi
+                    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+                    ./gradlew clean assembleDebug
+                '''
             }
         }
 
         stage('JUnit Unit Tests') {
             steps {
-                sh './gradlew testDebugUnitTest'
+                sh '''
+                    if [ ! -d "$ANDROID_HOME" ]; then
+                        if [ -d "$HOME/Library/Android/sdk" ]; then
+                            export ANDROID_HOME="$HOME/Library/Android/sdk"
+                        elif [ -d "/usr/local/share/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/local/share/android-sdk"
+                        elif [ -d "/usr/lib/android-sdk" ]; then
+                            export ANDROID_HOME="/usr/lib/android-sdk"
+                        fi
+                    fi
+                    export ANDROID_SDK_ROOT="$ANDROID_HOME"
+                    ./gradlew testDebugUnitTest
+                '''
             }
 
             post {
