@@ -106,11 +106,10 @@ pipeline {
             }
         }
 
-
         stage('Create APK File on Desktop') {
             steps {
                 sh '''
-            echo "Creating BookStoreApp folder on Desktop..."
+            echo "Creating BookStoreApp APK..."
 
             APK_FILE=$(find . -type f -path "*/build/outputs/apk/debug/*.apk" | head -n 1)
 
@@ -119,17 +118,27 @@ pipeline {
                 exit 1
             fi
 
-            DESKTOP_DIR="$HOME/Desktop/BookStoreApp"
+            # Generate build date and time
+            BUILD_DATE=$(date '+%Y-%m-%d_%H-%M-%S')
 
+            # Create Desktop folder
+            DESKTOP_DIR="$HOME/Desktop/BookStoreApp"
             mkdir -p "$DESKTOP_DIR"
 
-            cp "$APK_FILE" "$DESKTOP_DIR/app-debug.apk"
+            # Generate APK filename
+            APK_NAME="app-debug-${BUILD_DATE}.apk"
 
-            echo "APK successfully copied!"
-            ls -lh "$DESKTOP_DIR/app-debug.apk"
+            # Copy APK
+            cp "$APK_FILE" "$DESKTOP_DIR/$APK_NAME"
+
+            echo "APK successfully created!"
+            echo "APK Location: $DESKTOP_DIR/$APK_NAME"
+
+            ls -lh "$DESKTOP_DIR/$APK_NAME"
         '''
             }
         }
+
 
     }
 
