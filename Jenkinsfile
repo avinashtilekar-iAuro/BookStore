@@ -5,12 +5,24 @@ pipeline {
     environment {
         ANDROID_HOME = '/opt/android-sdk'
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        PATH = "${JAVA_HOME}/bin:${PATH}"
     }
+
     stages {
         stage('Checkout') {
             steps {
                 echo 'Checking out source code...'
                 // checkout scm
+            }
+        }
+
+        stage('Check Java') {
+            steps {
+                sh '''
+                    echo "JAVA_HOME: $JAVA_HOME"
+                    java -version
+                    which java
+                '''
             }
         }
 
@@ -24,7 +36,6 @@ pipeline {
         stage('JUnit Unit Tests') {
             steps {
                 echo 'Running JUnit test cases...'
-
                 sh './gradlew testDebugUnitTest'
             }
 
