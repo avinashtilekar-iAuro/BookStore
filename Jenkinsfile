@@ -105,6 +105,32 @@ pipeline {
                 }
             }
         }
+
+
+        stage('Create APK File on Desktop') {
+            steps {
+                sh '''
+            echo "Creating BookStoreApp folder on Desktop..."
+
+            APK_FILE=$(find . -type f -path "*/build/outputs/apk/debug/*.apk" | head -n 1)
+
+            if [ -z "$APK_FILE" ]; then
+                echo "ERROR: APK file not found!"
+                exit 1
+            fi
+
+            DESKTOP_DIR="$HOME/Desktop/BookStoreApp"
+
+            mkdir -p "$DESKTOP_DIR"
+
+            cp "$APK_FILE" "$DESKTOP_DIR/app-debug.apk"
+
+            echo "APK successfully copied!"
+            ls -lh "$DESKTOP_DIR/app-debug.apk"
+        '''
+            }
+        }
+
     }
 
     post {
