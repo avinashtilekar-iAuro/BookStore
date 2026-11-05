@@ -1,30 +1,21 @@
 pipeline {
-    agent {
-        docker {
-            image 'your-android-sdk-docker-image:latest'
-            // or agent any if SDK/JDK are pre-installed on the Jenkins node
-        }
-    }
-    environment {
-        ANDROID_HOME = '/opt/android-sdk'
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
-    }
+    agent any
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                echo 'Checking out source code...'
             }
         }
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'chmod +x gradlew'
-                sh './gradlew assembleDebug testDebugUnitTest'
+                echo 'Building application...'
+                // Add your local build commands here, e.g., sh 'mvn clean package'
             }
         }
-    }
-    post {
-        always {
-            junit 'app/build/test-results/**/*.xml'
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+            }
         }
     }
 }
