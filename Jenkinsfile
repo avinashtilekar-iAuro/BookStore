@@ -15,21 +15,15 @@ pipeline {
 
         stage('Configure Java') {
             steps {
-                script {
-                    def javaPath = sh(
-                            script: 'dirname $(dirname $(readlink -f $(which java)))',
-                            returnStdout: true
-                    ).trim()
-
-                    env.JAVA_HOME = javaPath
-                    env.PATH = "${javaPath}/bin:${env.PATH}"
-                }
-
                 sh '''
-                    echo "JAVA_HOME=$JAVA_HOME"
-                    java -version
-                    test -x "$JAVA_HOME/bin/java"
-                '''
+            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            export PATH=$JAVA_HOME/bin:$PATH
+
+            echo "Checking Java..."
+            java -version
+
+            test -f "$JAVA_HOME/bin/java"
+        '''
             }
         }
 
