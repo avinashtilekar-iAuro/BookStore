@@ -4,8 +4,6 @@ pipeline {
 
     environment {
         ANDROID_HOME = '/opt/android-sdk'
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
-        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -15,7 +13,7 @@ pipeline {
             }
         }
 
-       /* stage('Configure Java') {
+        stage('Configure Java') {
             steps {
                 sh '''
                     if [ ! -d "$JAVA_HOME" ]; then
@@ -37,7 +35,7 @@ pipeline {
                     java -version
                 '''
             }
-        }*/
+        }
 
         stage('Build') {
             steps {
