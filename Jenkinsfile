@@ -15,7 +15,7 @@ pipeline {
             }
         }
 
-        stage('Configure Java') {
+       /* stage('Configure Java') {
             steps {
                 sh '''
                     if [ ! -d "$JAVA_HOME" ]; then
@@ -37,7 +37,7 @@ pipeline {
                     java -version
                 '''
             }
-        }
+        }*/
 
         stage('Build') {
             steps {
