@@ -16,7 +16,7 @@ pipeline {
         stage('Configure Java') {
             steps {
                 sh '''
-            export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+            export JAVA_HOME=/iauro/lib/jvm/java-17-openjdk-amd64
             export PATH=$JAVA_HOME/bin:$PATH
 
             echo "Checking Java..."
